@@ -1,0 +1,36 @@
+syntax = 'proto3';
+
+package pcc.api.kernel;
+
+option go_package = "kernel";
+
+
+service Eentry2Scheduler {
+    rpc Register (EntryRegContext) returns (Empty) {}
+}
+
+service Client2Scheduler {
+    rpc Execute (ExecArgs) returns (JobId) {}
+}
+
+message Empty {
+    string empty = 1;
+}
+
+message EntryRegContext {
+    string name = 2;
+    int32  port = 1;
+}
+
+message JobId {
+    int64 id = 1;
+}
+
+message ExecArgs
+{
+        string path       = 1;
+        string args       = 2;
+        bytes  params     = 3;
+        int32  priority   = 4;
+        bool   compressed = 5;
+}
