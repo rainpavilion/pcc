@@ -10,7 +10,8 @@ service Eentry2Scheduler {
 }
 
 service Client2Scheduler {
-    rpc Execute (ExecArgs) returns (JobId) {}
+    rpc Execute  (ExecArgs)       returns (JobId)   {}
+    rpc ListApps (ListAppsOption) returns (AppList) {}
 }
 
 message Empty {
@@ -26,11 +27,47 @@ message JobId {
     int64 id = 1;
 }
 
-message ExecArgs
-{
-        string path       = 1;
-        string args       = 2;
-        bytes  params     = 3;
-        int32  priority   = 4;
-        bool   compressed = 5;
+message ExecArgs {
+	string path       = 1;
+	string args	      = 2;
+	bytes  params	  = 3;
+	int32  priority   = 4;
+	bool   compressed = 5;
+}
+
+message ListAppsOption {
+    string option = 1;
+}
+
+
+message TaskState {
+	int64   jobId			= 1;
+	int64   taskId		    = 2;
+	int32   progress		= 3;
+	int32   cpuUsage		= 4;
+	int32   memUsage		= 5;
+	int32   cpuCores		= 6;
+    int32   gpuSlice		= 7;
+	string  node			= 8;
+	int64   commitDuration  = 9;
+	int64   processDuration = 10;
+}
+
+
+message AppState {
+	int64		        jobId		    = 1;
+	int32		        progress		= 2;
+	int32		        status		    = 3;
+	string		        commiteTime	    = 4;
+	int64		        commitDuration  = 5;
+	int64		        processDuration = 6;
+	ExecArgs            args			= 7;
+	repeated TaskState  tasks           = 8;
+	string		        group		    = 9;
+	string		        user			= 10;
+}
+
+
+message AppList {
+	repeated AppState apps = 1;
 }
