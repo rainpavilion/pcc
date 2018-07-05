@@ -2,72 +2,106 @@ syntax = 'proto3';
 
 package pcc.api.kernel;
 
+// Package-wide variables from generator "generated".
 option go_package = "kernel";
 
 
+// Define interfaces between entry and scheduler.
 service Eentry2Scheduler {
-    rpc Register (EntryRegContext) returns (Empty) {}
+	// Entry register self into scheduler.
+	rpc	Register (EntryRegContext) returns (Empty) {}
+
+	// Entry create task
+	rpc	CreateTask (TaskDesc) returns (TaskDesc) {}
 }
 
+
+// Define interfaces between client and scheduler.
 service Client2Scheduler {
-    rpc Execute  (ExecArgs)       returns (JobId)   {}
-    rpc ListApps (ListAppsOption) returns (AppList) {}
+	// Commit execute application interfaces.
+	rpc Execute (ExecArgs) returns (AppDesc) {}
+
+	// List applications running in pcc
+	rpc ListApps (ListAppsOption) returns (AppList) {}
 }
 
+
+// Define empty type.
 message Empty {
-    string empty = 1;
+	string empty = 1;
 }
 
+
+// Define entry register context.
 message EntryRegContext {
-    string name = 2;
-    int32  port = 1;
+	string name = 1;							/* Entry unique name in PCC.						*/
 }
 
-message JobId {
-    int64 id = 1;
+
+// Define application description.
+message AppDesc {
+	int64 id = 1;								/* Application unique ID in PCC.					*/
 }
 
+
+// Define execute arguments.
 message ExecArgs {
-	string path       = 1;
-	string args	      = 2;
-	bytes  params	  = 3;
-	int32  priority   = 4;
-	bool   compressed = 5;
+	string path			= 1;					/* Application path.								*/
+	string args			= 2;					/* Application arguments in string.					*/
+	bytes  params		= 3;					/* Application arguments in binary.					*/
+	int32  priority		= 4;					/* Application priority.							*/
+	bool   compressed	= 5;					/* Arguments compressed flag.						*/
 }
 
+
+// Define list applications option.
 message ListAppsOption {
-    string option = 1;
+	string option = 1;							/* Option.											*/
 }
 
 
+// Define task state
 message TaskState {
-	int64   jobId			= 1;
-	int64   taskId		    = 2;
-	int32   progress		= 3;
-	int32   cpuUsage		= 4;
-	int32   memUsage		= 5;
-	int32   cpuCores		= 6;
-    int32   gpuSlice		= 7;
-	string  node			= 8;
-	int64   commitDuration  = 9;
-	int64   processDuration = 10;
+	int64   appId			= 1;				/* Application unique ID in PCC.					*/
+	int64   taskId			= 2;				/* Task unique ID in application.					*/
+	int32   progress		= 3;				/* Task progress.									*/
+	int32   cpuUsage		= 4;				/* CPU usage.										*/
+	int32   memUsage		= 5;				/* Memory usage.									*/
+	int32   cpuRequest		= 6;				/* CPU request.										*/
+    int32   gpuSlice		= 7;				/* GPU slice										*/
+	string  node			= 8;				/* Host node name.									*/
+	int64   commitDuration	= 9;				/* Commit duration.									*/
+	int64   processDuration	= 10;				/* process duration.								*/
 }
 
 
+// Define application state.
 message AppState {
-	int64		        jobId		    = 1;
-	int32		        progress		= 2;
-	int32		        status		    = 3;
-	string		        commiteTime	    = 4;
-	int64		        commitDuration  = 5;
-	int64		        processDuration = 6;
-	ExecArgs            args			= 7;
-	repeated TaskState  tasks           = 8;
-	string		        group		    = 9;
-	string		        user			= 10;
+	int64				id			    = 1;	/* Application unique ID in PCC.					*/
+	int32				progress		= 2;	/* Application progress.							*/
+	int32				status			= 3;	/* Application status.								*/
+	string				commiteTime		= 4;	/* Application commit time.							*/
+	int64				commitDuration	= 5;	/* Application commit duration.						*/
+	int64				processDuration	= 6;	/* Application process duration.					*/
+	ExecArgs			args			= 7;	/* Application execute arguments.					*/
+	repeated TaskState	tasks			= 8;	/* Tasks state.										*/
+	string				group			= 9;	/* Application group name.							*/
+	string				user			= 10;	/* Application user name.							*/
 }
 
 
+// Define application list.
 message AppList {
 	repeated AppState apps = 1;
+}
+
+
+// Define task description.
+message TaskDesc {
+	string	name 			= 1;				/* Task unique name in PCC.							*/
+	int64	id				= 2;				/* Task unique ID in application.					*/
+	int32	cpuRequest		= 3;				/* CPU resource request.							*/
+	int32	gpuRequest		= 4;				/* GPU resource request.							*/
+	int32	memRequestMB	= 5;				/* Memory resource request in million bytes.		*/
+	int32	netRequestKB	= 6;				/* Network resource request in kb/s					*/
 }
