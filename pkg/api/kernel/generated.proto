@@ -5,9 +5,8 @@ package pcc.api.kernel;
 // Package-wide variables from generator "generated".
 option go_package = "kernel";
 
-
 // Define interfaces between entry and scheduler.
-service Eentry2Scheduler {
+service Entry2Scheduler {
 	// Entry register self into scheduler.
 	rpc	Register (EntryRegContext) returns (Empty) {}
 
@@ -15,6 +14,11 @@ service Eentry2Scheduler {
 	rpc	CreateTask (TaskDesc) returns (TaskDesc) {}
 }
 
+// Define interfaces between scheduler and entry.
+service Scheduler2Entry {
+	// Create application.
+	rpc CreateApp (AppDesc) returns (AppDesc) {}
+}
 
 // Define interfaces between client and scheduler.
 service Client2Scheduler {
@@ -25,40 +29,44 @@ service Client2Scheduler {
 	rpc ListApps (ListAppsOption) returns (AppList) {}
 }
 
-
 // Define empty type.
 message Empty {
 	string empty = 1;
 }
 
+// Define client identity.
+message Identity {
+	string group = 1;							/* Group name.										*/
+	string user	 = 2;							/* User name.										*/
+}
+
 
 // Define entry register context.
 message EntryRegContext {
-	string name = 1;							/* Entry unique name in PCC.						*/
+	string name 	= 1;						/* Entry unique name in PCC.						*/
+	string endpoint = 2;						/* Entry endpoint.									*/
 }
 
 
 // Define application description.
 message AppDesc {
-	int64 id = 1;								/* Application unique ID in PCC.					*/
-}
-
-
-// Define execute arguments.
-message ExecArgs {
-	string path			= 1;					/* Application path.								*/
-	string args			= 2;					/* Application arguments in string.					*/
-	bytes  params		= 3;					/* Application arguments in binary.					*/
+	int64  id			= 1;					/* Application unique ID in PCC.					*/
+	string path			= 2;					/* Application path.								*/
+	string args			= 3;					/* Application arguments in string.					*/
 	int32  priority		= 4;					/* Application priority.							*/
 	bool   compressed	= 5;					/* Arguments compressed flag.						*/
 }
 
+// Define execute arguments.
+message ExecArgs {
+	Identity 	client	= 1;					/* Client identity.									*/
+	AppDesc		desc	= 2;					/* Application executable arguments.				*/
+}
 
 // Define list applications option.
 message ListAppsOption {
 	string option = 1;							/* Option.											*/
 }
-
 
 // Define task state
 message TaskState {
@@ -68,12 +76,11 @@ message TaskState {
 	int32   cpuUsage		= 4;				/* CPU usage.										*/
 	int32   memUsage		= 5;				/* Memory usage.									*/
 	int32   cpuRequest		= 6;				/* CPU request.										*/
-    int32   gpuSlice		= 7;				/* GPU slice										*/
+	int32   gpuSlice		= 7;				/* GPU slice										*/
 	string  node			= 8;				/* Host node name.									*/
 	int64   commitDuration	= 9;				/* Commit duration.									*/
 	int64   processDuration	= 10;				/* process duration.								*/
 }
-
 
 // Define application state.
 message AppState {
@@ -89,19 +96,18 @@ message AppState {
 	string				user			= 10;	/* Application user name.							*/
 }
 
-
 // Define application list.
 message AppList {
 	repeated AppState apps = 1;
 }
 
-
 // Define task description.
 message TaskDesc {
 	string	name 			= 1;				/* Task unique name in PCC.							*/
-	int64	id				= 2;				/* Task unique ID in application.					*/
-	int32	cpuRequest		= 3;				/* CPU resource request.							*/
-	int32	gpuRequest		= 4;				/* GPU resource request.							*/
-	int32	memRequestMB	= 5;				/* Memory resource request in million bytes.		*/
-	int32	netRequestKB	= 6;				/* Network resource request in kb/s					*/
+	int64	appId			= 2;				/* Application ID.									*/
+	int64	taskId			= 3;				/* Task unique ID in application.					*/
+	int32	cpuRequest		= 4;				/* CPU resource request.							*/
+	int32	gpuRequest		= 5;				/* GPU resource request.							*/
+	int32	memRequestMB	= 6;				/* Memory resource request in million bytes.		*/
+	int32	netRequestKB	= 7;				/* Network resource request in kb/s					*/
 }
